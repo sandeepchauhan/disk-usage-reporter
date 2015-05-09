@@ -1,0 +1,52 @@
+﻿@model List<DiskUsageReporter.Library.DirStat>
+@{
+    var rootDir = @Model.First();
+    ViewBag.Title = "Disk Usage for dir: " + @rootDir.DirFullName;
+}
+<div>
+    <br />
+    <table>
+        <thead>
+            <tr>
+                <th>Directory</th>
+                <th>Total Size (MB)</th>
+                <th>%age</th>
+                <th>Files Size (MB)</th>
+                <th>Last Scanned At</th>
+            </tr>
+        </thead>
+        @{
+            var divisor = 1024 * 1024;
+            var totalSizeInMB = rootDir.TotalSizeInBytes / divisor;
+            var rootDirTotalSizeInMB = totalSizeInMB;
+            var filesSizeInMB = rootDir.FilesSizeInBytes / divisor;
+            var parentDirOfRoot = rootDir.DirFullName.Substring(0, rootDir.DirFullName.LastIndexOf('\\'));
+            if (parentDirOfRoot.EndsWith(":"))
+            {
+                parentDirOfRoot = parentDirOfRoot + "\\";
+            }
+        }
+        <tr class="root-dir-row">
+            <td>@Html.ActionLink(@rootDir.DirFullName, "Index", new { rootDirPath = @parentDirOfRoot })</td>
+            <td>@totalSizeInMB</td>
+            <td><progress value="@totalSizeInMB" max="@totalSizeInMB"></progress></td>
+            <td>@filesSizeInMB</td>
+            <td>@rootDir.LastScannedTime</td>
+        </tr>
+        @foreach(var x in @Model.Skip(1))
+        {
+            var nameOfThisDir = x.DirFullName.Split(new char[] { '\\' }).Last();
+            totalSizeInMB = @x.TotalSizeInBytes / @divisor;
+            filesSizeInMB = @x.FilesSizeInBytes / @divisor;
+            <tr class="child-dir-row">
+                <td>@Html.ActionLink(@nameOfThisDir, "Index", new { rootDirPath = @x.DirFullName })</td>
+                <td>@totalSizeInMB</td>
+                <td><progress value="@totalSizeInMB" max="@rootDirTotalSizeInMB"></progress></td>
+                <td>@filesSizeInMB</td>
+                <td>@x.LastScannedTime</td>
+            </tr>
+        }
+    </table>
+    <br />
+    @Html.ActionLink("Rescan", "Index", new { rootDirPath = @rootDir.DirFullName, rescan = true })
+</div>
