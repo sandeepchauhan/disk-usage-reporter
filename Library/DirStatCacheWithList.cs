@@ -8,28 +8,28 @@ using System.Threading.Tasks;
 
 namespace DiskUsageReporter.Library
 {
-    public class DirStatCache
+    public class DirStatCacheWithList
     {
-        private Dictionary<string, DirStat> _dirStatCache = new Dictionary<string, DirStat>();
+        private List<DirStat> _dirStatCache = new List<DirStat>();
 
         private DataContractJsonSerializer _jsonSerializer;
 
         private DateTimeOffset _currentCacheFileScanTime;
 
-        private static DirStatCache _instance;
+        private static DirStatCacheWithList _instance;
 
-        private DirStatCache()
+        private DirStatCacheWithList()
         {
             _jsonSerializer = new DataContractJsonSerializer(typeof(List<DirStat>));
         }
 
-        public static DirStatCache Instance
+        public static DirStatCacheWithList Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new DirStatCache();
+                    _instance = new DirStatCacheWithList();
 
                     FileStream cacheFileStream = null;
                     DirectoryInfo cacheFilesDirInfo = new DirectoryInfo(@"D:\gitrepos\disk-usage-reporter");
@@ -46,8 +46,8 @@ namespace DiskUsageReporter.Library
                     }
                     if (cacheFileStream != null && cacheFileStream.Length > 0)
                     {
-                        _instance._dirStatCache = ((List<DirStat>)_instance._jsonSerializer.ReadObject(cacheFileStream)).ToDictionary(x => x.DirFullName);
-                        _instance._currentCacheFileScanTime = _instance._dirStatCache.Values.Select(x => x.LastScannedTime).Max();
+                        _instance._dirStatCache = ((List<DirStat>)_instance._jsonSerializer.ReadObject(cacheFileStream));
+                        _instance._currentCacheFileScanTime = _instance._dirStatCache.Select(x => x.LastScannedTime).Max();
                     }
                 }
 
@@ -57,11 +57,11 @@ namespace DiskUsageReporter.Library
         
         public void Flush()
         {
-            if (_dirStatCache.Values.Select(x => x.LastScannedTime).Max() > _currentCacheFileScanTime)
+            if (_dirStatCache.Select(x => x.LastScannedTime).Max() > _currentCacheFileScanTime)
             {
                 using (FileStream cacheFileStream = new FileStream(@"D:\gitrepos\disk-usage-reporter\CacheFile-" + DateTimeOffset.UtcNow.Ticks + ".json", FileMode.CreateNew))
                 {
-                    _jsonSerializer.WriteObject(cacheFileStream, _dirStatCache.Select(x => x.Value).ToList());
+                    _jsonSerializer.WriteObject(cacheFileStream, _dirStatCache.ToList());
                 }
             }
         }
@@ -70,13 +70,11 @@ namespace DiskUsageReporter.Library
         {
             get
             {
-                DirStat ret;
-                this._dirStatCache.TryGetValue(dirPath, out ret);
-                return ret;
+                return this._dirStatCache.Find(x => x.DirFullName.Equals(dirPath));
             }
             set
             {
-                this._dirStatCache[dirPath] = value;
+                this._dirStatCache.Add(value);
             }
         }
 

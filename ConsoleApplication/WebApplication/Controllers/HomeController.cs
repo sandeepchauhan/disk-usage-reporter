@@ -9,7 +9,7 @@ namespace WebApplication.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index(string rootDirPath = @"C:\", bool rescan = false)
+        public ActionResult Index(string rootDirPath = @"C:\users", bool rescan = false)
         {
             List<DirStat> list = DirStat.GetStatForDirAndItsChildren(rootDirPath, rescan);
             return View(list);

@@ -12,6 +12,8 @@
                 <th>Total Size (MB)</th>
                 <th>%age</th>
                 <th>Files Size (MB)</th>
+                <th>Number of Dirs</th>
+                <th>Number of Files</th>
                 <th>Last Scanned At</th>
             </tr>
         </thead>
@@ -31,9 +33,11 @@
             <td>@totalSizeInMB</td>
             <td><progress value="@totalSizeInMB" max="@totalSizeInMB"></progress></td>
             <td>@filesSizeInMB</td>
+            <td>@rootDir.NumberOfDirs</td>
+            <td>@rootDir.NumberOfFiles</td>
             <td>@rootDir.LastScannedTime</td>
         </tr>
-        @foreach(var x in @Model.Skip(1))
+        @foreach(var x in @Model.Skip(1).Take(20))
         {
             var nameOfThisDir = x.DirFullName.Split(new char[] { '\\' }).Last();
             totalSizeInMB = @x.TotalSizeInBytes / @divisor;
@@ -43,6 +47,8 @@
                 <td>@totalSizeInMB</td>
                 <td><progress value="@totalSizeInMB" max="@rootDirTotalSizeInMB"></progress></td>
                 <td>@filesSizeInMB</td>
+                <td>@x.NumberOfDirs</td>
+                <td>@x.NumberOfFiles</td>
                 <td>@x.LastScannedTime</td>
             </tr>
         }

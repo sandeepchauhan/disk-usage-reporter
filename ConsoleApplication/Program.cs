@@ -1,6 +1,7 @@
 ﻿using System;
 using DiskUsageReporter.Library;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ConsoleApplication
 {
@@ -8,8 +9,12 @@ namespace ConsoleApplication
     {
         static void Main(string[] args)
         {
-            string dirPath = @"C:\users\sanch\appdata\local\microsoft";
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            string dirPath = @"C:\";
             DirStat.GetStatForDirAndItsChildren(dirPath).ForEach(x => PrintSingleDirInfo(x));
+            sw.Stop();
+            Console.WriteLine("Time taken: " + sw.ElapsedMilliseconds);
             Console.ReadLine();
         }
 
