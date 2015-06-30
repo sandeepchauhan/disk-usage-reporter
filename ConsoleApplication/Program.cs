@@ -1,6 +1,5 @@
 ﻿using System;
 using DiskUsageReporter.Library;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace ConsoleApplication
